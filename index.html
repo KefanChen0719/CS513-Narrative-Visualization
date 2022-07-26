@@ -1,0 +1,309 @@
+<!doctype html>
+<html>
+
+<h1> Covid Cases Trends in Each Country </h1>
+
+<div id="page1_description">
+  <p> In this narrative visualization, we will check the Covid Case trends in each country. </p>
+  <p> Firstly, let's examine the Covid Cases in United States. </p>
+  <p> You can view the detailed number of each month in the graph.</p>
+</div>
+
+<div id="page2_description" style="display: none;">
+  <p> Then let's check the data from Canada. </p>
+  <p> You can view the detailed number of each month in the graph.</p>
+</div>
+
+<div id="page3_description" style="display: none;">
+  <p> Now let's view the trend for Japan. </p>
+  <p> You can view the detailed number of each month in the graph.</p>
+</div>
+
+<div id="page4_description" style="display: none;">
+  <p> In this page, you will be select the country that you are interested in and view its data. </p>
+  <p> Feel free to explore here as you wish. </p>
+  <p> You can view the detailed number of each month in the graph.</p>
+</div>
+
+<script src="https://d3js.org/d3.v4.js"></script>
+
+<body></body>
+
+<script>
+  d3.select("body")
+    .append("select")
+    .attr("id", "country")
+    .style("display", "none");
+  d3.csv("https://raw.githubusercontent.com/kefanchen0719/CS513-Narrative-Visulation/main/covid_data.csv", function(error, data) {
+    countries = [];
+    data.forEach(element => countries.push(element['Country/Region']));
+    console.log(countries);
+    d3.select("#country")
+      .selectAll("options")
+      .data(countries)
+      .enter()
+      .append("option")
+      .attr("value", function(d) { return d; })
+      .text(function(d) { return d; });
+    d3.select("#country").on("change", function() {
+      d3.select("#covidgraph").selectAll("*").remove();
+      display(d3.select(this).property('value'));
+    });
+  });
+</script>
+
+<p></p>
+
+<script>
+  d3.select("body").append("svg").attr("id", "covidgraph");
+</script>
+
+<script>
+  function display(country) {
+    margin = { top: 30, right: 150, bottom: 30, left: 100 };
+    width = 960 - margin.left - margin.right;
+    height = 500 - margin.top - margin.bottom;
+    svg = d3.select("#covidgraph")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+    parseDate = d3.timeParse("%m/%d/%Y");
+    dateFormatter = d3.timeFormat("%m/%Y");
+
+    x = d3.scaleTime().range([0, width]);
+    xAxis = d3.axisBottom().scale(x).tickFormat(dateFormatter);
+    line = d3.line()
+            .x(function(d) { return x(d.date); })
+            .y(function(d) { return y(d.val); });
+
+    bisectDate = d3.bisector(function(d) { return d.date; }).left;
+
+    d3.csv("https://raw.githubusercontent.com/kefanchen0719/CS513-Narrative-Visulation/main/covid_data.csv", function(error, data) {
+        index = data.findIndex( x => x['Country/Region'] === country );
+        data = [
+          {date: parseDate("02/01/2020"), val: data[index]['2/1/20']},
+          {date: parseDate("03/01/2020"), val: data[index]['3/1/20']},
+          {date: parseDate("04/01/2020"), val: data[index]['4/1/20']},
+          {date: parseDate("05/01/2020"), val: data[index]['5/1/20']},
+          {date: parseDate("06/01/2020"), val: data[index]['6/1/20']},
+          {date: parseDate("07/01/2020"), val: data[index]['7/1/20']},
+          {date: parseDate("08/01/2020"), val: data[index]['8/1/20']},
+          {date: parseDate("09/01/2020"), val: data[index]['9/1/20']},
+          {date: parseDate("10/01/2020"), val: data[index]['10/1/20']},
+          {date: parseDate("11/01/2020"), val: data[index]['11/1/20']},
+          {date: parseDate("12/01/2020"), val: data[index]['12/1/20']},
+          {date: parseDate("01/01/2021"), val: data[index]['1/1/21']},
+          {date: parseDate("02/01/2021"), val: data[index]['2/1/21']},
+          {date: parseDate("03/01/2021"), val: data[index]['3/1/21']},
+          {date: parseDate("04/01/2021"), val: data[index]['4/1/21']},
+          {date: parseDate("05/01/2021"), val: data[index]['5/1/21']},
+          {date: parseDate("06/01/2021"), val: data[index]['6/1/21']},
+          {date: parseDate("07/01/2021"), val: data[index]['7/1/21']},
+          {date: parseDate("08/01/2021"), val: data[index]['8/1/21']},
+          {date: parseDate("09/01/2021"), val: data[index]['9/1/21']},
+          {date: parseDate("10/01/2021"), val: data[index]['10/1/21']},
+          {date: parseDate("11/01/2021"), val: data[index]['11/1/21']},
+          {date: parseDate("12/01/2021"), val: data[index]['12/1/21']},
+          {date: parseDate("01/01/2022"), val: data[index]['1/1/22']},
+          {date: parseDate("02/01/2022"), val: data[index]['2/1/22']},
+          {date: parseDate("03/01/2022"), val: data[index]['3/1/22']},
+          {date: parseDate("04/01/2022"), val: data[index]['4/1/22']},
+          {date: parseDate("05/01/2022"), val: data[index]['5/1/22']},
+          {date: parseDate("06/01/2022"), val: data[index]['6/1/22']}]
+
+        x.domain([parseDate("02/01/2020"), parseDate("06/01/2022")]);
+        y = d3.scaleLinear().range([height, 0]).domain([0, data[28].val]);
+        yAxis = d3.axisLeft().scale(y)
+
+        svg.append("g")
+            .attr("class", "x axis")
+            .attr("transform", "translate(0," + height + ")")
+            .call(xAxis);
+        svg.append("g")
+            .attr("class", "y axis")
+            .call(yAxis)
+            .append("text")
+            .attr("transform", "rotate(90)")
+            .attr("y", 6)
+            .style("text-anchor", "end")
+            .text("Cases");
+        svg.append("path")
+            .style("stroke", "steelblue")
+            .style("stroke-width", 1)
+            .datum(data)
+            .attr("fill", "none")
+            .attr("class", "line")
+            .attr("d", line);
+        svg.append("text")
+            .attr("font-size", "30")
+            .attr("x", 100)
+            .attr("y", 0)
+            .text(country)
+
+        final_status = svg.append("g")
+                          .style("display", null)
+                          .attr("transform", "translate(" + x(data[28].date) + "," + y(data[28].val) + ")");
+        final_status.append("rect")
+                    .style("stroke", "black")
+                    .attr("class", "tooltip")
+                    .attr("width", 140)
+                    .attr("height", 50)
+                    .attr("fill", "white")
+                    .attr("x", 10)
+                    .attr("y", -20);
+        final_status.append("text")
+                    .attr("font-size", "16")
+                    .attr("x", 20)
+                    .attr("y", -2)
+                    .text(dateFormatter(data[28].date));
+        final_status.append("text")
+                    .attr("font-size", "16")
+                    .attr("x", 20)
+                    .attr("y", 20)
+                    .text("Case:" + data[28].val);
+
+        mouse_over_highlight = svg.append("g")
+                                  .style("display", "none");
+        mouse_over_highlight.append("circle")
+                            .attr("r", 3);
+        mouse_over_highlight.append("rect")
+                            .style("stroke", "black")
+                            .attr("class", "tooltip")
+                            .attr("width", 140)
+                            .attr("height", 50)
+                            .attr("fill", "white")
+                            .attr("x", 10)
+                            .attr("y", -20);
+        mouse_over_highlight.append("text")
+                            .attr("class", "tooltip-date")
+                            .attr("font-size", "16")
+                            .attr("x", 18)
+                            .attr("y", -2);
+        mouse_over_highlight.append("text")
+                            .attr("font-size", "16")
+                            .attr("x", 20)
+                            .attr("y", 20)
+                            .text("Case:");
+        mouse_over_highlight.append("text")
+                            .attr("class", "tooltip-case-num")
+                            .attr("font-size", "16")
+                            .attr("x", 60)
+                            .attr("y", 20);
+        svg.append("rect")
+            .attr("class", "overlay")
+            .attr("width", width)
+            .attr("height", height)
+            .attr("fill", "none")
+            .attr("pointer-events", "all")
+            .on("mouseover", function() { mouse_over_highlight.style("display", null); })
+            .on("mouseout", function() { mouse_over_highlight.style("display", "none"); })
+            .on("mousemove", mousemove);
+        function mousemove() {
+            x0 = x.invert(d3.mouse(this)[0]);
+            i = bisectDate(data, x0, 1);
+            d0 = data[i - 1];
+            d1 = data[i];
+            d = x0 - d0.date > d1.date - x0 ? d1 : d0;
+            mouse_over_highlight.attr("transform", "translate(" + x(d.date) + "," + y(d.val) + ")");
+            mouse_over_highlight.select(".tooltip-date").text(dateFormatter(d.date));
+            mouse_over_highlight.select(".tooltip-case-num").text(d.val);
+        }
+    });
+}
+</script>
+
+<script>
+  display("United States");
+</script>
+
+<script>
+function gotopage1() {
+  d3.select("#covidgraph").selectAll("*").remove();
+  d3.selectAll("#page1_description").style("display", null);
+  d3.selectAll("#page2_description").style("display", "none");
+  d3.selectAll("#page3_description").style("display", "none");
+  d3.selectAll("#page4_description").style("display", "none");
+  d3.selectAll("#country").style("display", "none");
+  d3.selectAll("#page2_navigation").style("display", "none");
+  d3.selectAll("#page3_navigation").style("display", "none");
+  d3.selectAll("#page4_navigation").style("display", "none");
+  display("United States");
+  d3.selectAll("#page1_navigation").style("display", null);
+}
+</script>
+
+<script>
+function gotopage2() {
+  d3.select("#covidgraph").selectAll("*").remove();
+  d3.selectAll("#page2_description").style("display", null);
+  d3.selectAll("#page1_description").style("display", "none");
+  d3.selectAll("#page3_description").style("display", "none");
+  d3.selectAll("#page4_description").style("display", "none");
+  d3.selectAll("#country").style("display", "none");
+  d3.selectAll("#page1_navigation").style("display", "none");
+  d3.selectAll("#page3_navigation").style("display", "none");
+  d3.selectAll("#page4_navigation").style("display", "none");
+  display("Canada");
+  d3.selectAll("#page2_navigation").style("display", null);
+}
+</script>
+
+<script>
+function gotopage3() {
+  d3.select("#covidgraph").selectAll("*").remove();
+  d3.selectAll("#page3_description").style("display", null);
+  d3.selectAll("#page1_description").style("display", "none");
+  d3.selectAll("#page2_description").style("display", "none");
+  d3.selectAll("#page4_description").style("display", "none");
+  d3.selectAll("#country").style("display", "none");
+  d3.selectAll("#page1_navigation").style("display", "none");
+  d3.selectAll("#page2_navigation").style("display", "none");
+  d3.selectAll("#page4_navigation").style("display", "none");
+  display("Japan");
+  d3.selectAll("#page3_navigation").style("display", null);
+}
+</script>
+
+<script>
+function gotopage4() {
+  d3.select("#covidgraph").selectAll("*").remove();
+  d3.selectAll("#page4_description").style("display", null);
+  d3.selectAll("#page1_description").style("display", "none");
+  d3.selectAll("#page2_description").style("display", "none");
+  d3.selectAll("#page3_description").style("display", "none");
+  d3.selectAll("#country").style("display", null);
+  d3.selectAll("#page1_navigation").style("display", "none");
+  d3.selectAll("#page2_navigation").style("display", "none");
+  d3.selectAll("#page3_navigation").style("display", "none");
+  display(d3.selectAll("#country").node().value);
+  d3.selectAll("#page4_navigation").style("display", null);
+}
+</script>
+
+<div id="page1_navigation">
+  <p> Go to the next page to view the <a href="#" onclick="gotopage2();">Canada</a> data. </p>
+</div>
+
+<div id="page2_navigation" style="display: none;">
+  <p> Go to the previous page to view the <a href="#" onclick="gotopage1();">United States</a> data. </p>
+</div>
+
+<div id="page2_navigation" style="display: none;">
+  <p> Go to the next page to view the <a href="#" onclick="gotopage3();">Japan</a> data. </p>
+</div>
+
+<div id="page3_navigation" style="display: none;">
+  <p> Go to the previous page to view the <a href="#" onclick="gotopage2();">Canada</a> data. </p>
+</div>
+
+<div id="page3_navigation" style="display: none;">
+  <p> Go to the next page to view <a href="#" onclick="gotopage4();">Arbitrary Country</a> data. </p>
+</div>
+
+<div id="page4_navigation" style="display: none;">
+  <p> Go to the previous page to view the <a href="#" onclick="gotopage3();">Japan</a> data. </p>
+</div>
+
+</html>
